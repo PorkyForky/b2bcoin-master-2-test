@@ -132,7 +132,8 @@ void wallet_rpc_server::processRequest(const CryptoNote::HttpRequest& request, C
       { "generatePaymentId", makeMemberMethod(&wallet_rpc_server::on_generate_payment_id) },
       { "get_transfers", makeMemberMethod(&wallet_rpc_server::on_get_transfers) },
       { "get_height", makeMemberMethod(&wallet_rpc_server::on_get_height) },
-      { "reset", makeMemberMethod(&wallet_rpc_server::on_reset) }
+      { "reset", makeMemberMethod(&wallet_rpc_server::on_reset) },
+      { "reset_from", makeMemberMethod(&wallet_rpc_server::on_reset_from) }
     };
 
     auto it = s_methods.find(jsonRequest.getMethod());
@@ -312,6 +313,11 @@ bool wallet_rpc_server::on_get_height(const wallet_rpc::COMMAND_RPC_GET_HEIGHT::
 }
 
 bool wallet_rpc_server::on_reset(const wallet_rpc::COMMAND_RPC_RESET::request& req, wallet_rpc::COMMAND_RPC_RESET::response& res) {
+  m_wallet.reset();
+  return true;
+}
+
+bool wallet_rpc_server::on_reset_from(const wallet_rpc::COMMAND_RPC_RESET_FROM::request& req, wallet_rpc::COMMAND_RPC_RESET_FROM::response& res) {
   m_wallet.reset();
   return true;
 }

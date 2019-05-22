@@ -423,19 +423,6 @@ bool Core::queryBlocksLite(const std::vector<Crypto::Hash>& knownBlockHashes, ui
 
     startIndex = findBlockchainSupplement(knownBlockHashes); // throws
 
-    // Stops bug where wallets fail to sync, because timestamps have been adjusted after syncronisation.
-    // check for a query of the blocks where the block index is non-zero, but the timestamp is zero
-    // indicating that the originator did not know the internal time of the block, but knew which block
-    // was wanted by index.  Fullfill this by getting the time of m_blocks[startIndex].timestamp.
-
-    if (startIndex > 0 && timestamp == 0) {
-      if (startIndex <= mainChain->getTopBlockIndex()) {
-        RawBlock block = mainChain->getBlockByIndex(startIndex);
-        auto blockTemplate = extractBlockTemplate(block);
-        timestamp = blockTemplate.timestamp;
-      }
-    }
-
     fullOffset = mainChain->getTimestampLowerBoundBlockIndex(timestamp);
     if (fullOffset < startIndex) {
       fullOffset = startIndex;
