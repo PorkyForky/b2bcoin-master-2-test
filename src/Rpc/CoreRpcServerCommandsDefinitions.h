@@ -59,6 +59,24 @@ struct COMMAND_RPC_GET_HEIGHT {
   };
 };
 
+struct COMMAND_RPC_GET_AMOUNT {
+  typedef EMPTY_STRUCT request;
+
+  struct response {
+    std::string coins_already_generated;
+    std::string coins_left_to_generate;
+    std::string coins_total_supply;
+    std::string status;
+
+    void serialize(ISerializer &s) {
+      KV_MEMBER(coins_already_generated)
+      KV_MEMBER(coins_left_to_generate)
+      KV_MEMBER(coins_total_supply)
+      KV_MEMBER(status)
+    }
+  };
+};
+
 struct COMMAND_RPC_GET_BLOCKS_FAST {
 
   struct request {
@@ -282,11 +300,13 @@ struct COMMAND_RPC_GET_INFO {
     uint64_t tx_count;
     uint64_t tx_pool_size;
     uint64_t alt_blocks_count;
+    std::string coins_already_generated;
     uint64_t outgoing_connections_count;
     uint64_t incoming_connections_count;
     uint64_t white_peerlist_size;
     uint64_t grey_peerlist_size;
     uint32_t last_known_block_index;
+    std::string version;
 
     void serialize(ISerializer &s) {
       KV_MEMBER(status)
@@ -295,11 +315,13 @@ struct COMMAND_RPC_GET_INFO {
       KV_MEMBER(tx_count)
       KV_MEMBER(tx_pool_size)
       KV_MEMBER(alt_blocks_count)
+      KV_MEMBER(coins_already_generated)
       KV_MEMBER(outgoing_connections_count)
       KV_MEMBER(incoming_connections_count)
       KV_MEMBER(white_peerlist_size)
       KV_MEMBER(grey_peerlist_size)
       KV_MEMBER(last_known_block_index)
+      KV_MEMBER(version)
     }
   };
 };

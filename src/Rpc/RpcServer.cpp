@@ -29,6 +29,9 @@
 
 #include "CryptoNoteProtocol/CryptoNoteProtocolHandlerCommon.h"
 
+#include "CryptoNoteConfig.h"
+#include "version.h"
+
 #include "P2p/NetNode.h"
 
 #include "CoreRpcServerErrorCodes.h"
@@ -123,6 +126,7 @@ std::unordered_map<std::string, RpcServer::RpcHandler<RpcServer::HandlerFunction
   // json handlers
   { "/getinfo", { jsonMethod<COMMAND_RPC_GET_INFO>(&RpcServer::on_get_info), true } },
   { "/getheight", { jsonMethod<COMMAND_RPC_GET_HEIGHT>(&RpcServer::on_get_height), true } },
+  { "/getamount", { jsonMethod<COMMAND_RPC_GET_AMOUNT>(&RpcServer::on_get_amount), true } },
   { "/gettransactions", { jsonMethod<COMMAND_RPC_GET_TRANSACTIONS>(&RpcServer::on_get_transactions), false } },
   { "/sendrawtransaction", { jsonMethod<COMMAND_RPC_SEND_RAW_TX>(&RpcServer::on_send_raw_tx), false } },
   { "/feeaddress", { jsonMethod<COMMAND_RPC_GET_FEE_ADDRESS>(&RpcServer::on_get_fee_address), true } },
@@ -444,18 +448,28 @@ bool RpcServer::on_get_info(const COMMAND_RPC_GET_INFO::request& req, COMMAND_RP
   res.tx_count = m_core.getBlockchainTransactionCount() - res.height; //without coinbase
   res.tx_pool_size = m_core.getPoolTransactionCount();
   res.alt_blocks_count = m_core.getAlternativeBlockCount();
+  res.coins_already_generated = m_core.getCurrency().formatAmount(m_core.getTotalGeneratedAmount());
   uint64_t total_conn = m_p2p.get_connections_count();
   res.outgoing_connections_count = m_p2p.get_outgoing_connections_count();
   res.incoming_connections_count = total_conn - res.outgoing_connections_count;
   res.white_peerlist_size = m_p2p.getPeerlistManager().get_white_peers_count();
   res.grey_peerlist_size = m_p2p.getPeerlistManager().get_gray_peers_count();
   res.last_known_block_index = std::max(static_cast<uint32_t>(1), m_protocol.getObservedHeight()) - 1;
+  res.version = PROJECT_VERSION;
   res.status = CORE_RPC_STATUS_OK;
   return true;
 }
 
 bool RpcServer::on_get_height(const COMMAND_RPC_GET_HEIGHT::request& req, COMMAND_RPC_GET_HEIGHT::response& res) {
   res.height = m_core.getTopBlockIndex() + 1;
+  res.status = CORE_RPC_STATUS_OK;
+  return true;
+}
+
+bool RpcServer::on_get_amount(const COMMAND_RPC_GET_AMOUNT::request& req, COMMAND_RPC_GET_AMOUNT::response& res) {
+  res.coins_already_generated = m_core.getCurrency().formatAmount(m_core.getTotalGeneratedAmount());
+  res.coins_left_to_generate = m_core.getCurrency().formatAmount(CryptoNote::parameters::MONEY_SUPPLY - m_core.getTotalGeneratedAmount());
+  res.coins_total_supply = m_core.getCurrency().formatAmount(CryptoNote::parameters::MONEY_SUPPLY);
   res.status = CORE_RPC_STATUS_OK;
   return true;
 }
